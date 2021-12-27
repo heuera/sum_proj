@@ -63,5 +63,14 @@ comp_data$lstmean <- cut(comp_data$lstmean,
                          breaks = c(-Inf, 30, 33.999, 50),
                          labels = c("<30", "30-34", ">34"))
 
+# Account for DHS survey design
+comp_data <- comp_data %>% mutate(
+  hh_samp_weight = as.numeric(hhweight/1000000),
+  unique_id = as.numeric(paste0(surveyid, clusterid,"")))
+DHSdesign <- comp_data %>% 
+  svydesign(id = comp_data$unique_id, 
+            strata = comp_data$urbanrural, 
+            weights = comp_data$hh_samp_weight, 
+            probs = NULL)
 
 
