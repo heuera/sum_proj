@@ -15,6 +15,11 @@ comp_data <- as_tibble(comp_data)
 comp_data <- comp_data %>% filter(ageyears < 5)
 
 # Organize variables 
+comp_data <- comp_data %>% mutate(haz = as.factor(haz))
+levels(comp_data$haz) <- c("Not stunted", "Stunted")
+comp_data$surveyyear <- cut(comp_data$surveyyear, 
+                        breaks = c(-Inf, 2000, 2005, 2011, 2016), 
+                        labels = c("2000", "2005", "2011", "2016"))
 comp_data <- comp_data %>% mutate(ethnic = as.factor(eth))
 levels(comp_data$ethnic) <- c("Oromo", "Amhara", "Tigrie", "Other")
 comp_data <- comp_data %>% mutate(electricity = as.factor(electricity))
@@ -65,12 +70,76 @@ comp_data$lstmean <- cut(comp_data$lstmean,
 
 # Account for DHS survey design
 comp_data <- comp_data %>% mutate(
-  hh_samp_weight = as.numeric(hhweight/1000000),
-  unique_id = as.numeric(paste0(surveyid, clusterid,"")))
+            hh_samp_weight = as.numeric(hhweight/1000000),
+            unique_id = as.numeric(paste0(surveyid, clusterid,"")))
 DHSdesign <- comp_data %>% 
-  svydesign(id = comp_data$unique_id, 
-            strata = comp_data$urbanrural, 
-            weights = comp_data$hh_samp_weight, 
-            probs = NULL)
+                    svydesign(id = comp_data$unique_id, 
+                              strata = comp_data$urbanrural, 
+                              weights = comp_data$hh_samp_weight, 
+                              probs = NULL)
+
+# Descriptive analysis
+svy: tab haz eth, column ci 
+
+svyby(~ageyears, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+svymean(~comp_data$ageyears, DHSdesign, na.rm = TRUE) #good
+
+svy: tab gender eth, column ci 
+svy: tab healthcard eth, column ci 
+svy: tab whz eth, column ci // wasted
+svy: tab waz eth, column ci //underweight
+
+svymean(~comp_data$border, DHSdesign, na.rm = TRUE) #good
+svyby(~border, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+
+svy: tab religion_n eth, column ci 
+
+svymean(~comp_data$motherage, DHSdesign, na.rm = TRUE) #good
+svyby(~motherage, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+svymean(~comp_data$motherheightcm, DHSdesign, na.rm = TRUE) #good
+svyby(~motherheightcm, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+
+svy: tab crowding eth, column ci //not avail. for all years
+svy: tab swater eth, column ci 
+svy: tab housetype eth, column ci //not avail. for all years
+svy: tab tfacility eth, column ci 
+svy: tab wealthq eth, column ci //not avail. for all years
+svy: tab edhigh eth, column ci 
+svy: tab urbanrural eth, column ci 
+
+svymean(~comp_data$clusteraltitude, DHSdesign, na.rm = TRUE) #good
+svyby(~clusteraltitude, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+svymean(~comp_data$precipitation_mean, DHSdesign, na.rm = TRUE) #good
+svyby(~precipitation_mean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+svymean(~comp_data$lstmean, DHSdesign, na.rm = TRUE) #good
+svyby(~lstmean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
+
+
+
+# Crude model
+crude <- svyglm(haz ~ ethnic + surveyyear, design = DHSdesign, family = "binomial")
+exp(coefficients(crude))
+
+# Adjusted model one
+adj1 <- svyglm(haz ~ ethnic + surveyyear + wealthq + edhigh + gender + ageyears + diarrhoea + 
+                  religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
+                  crowding + housetype + border + clusteraltitude + lstmean +
+                    motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+exp(coefficients(adj1))
+
+# Adjusted model two
+adj2 <- svyglm(haz ~ ethnic + surveyyear + edhigh + gender + ageyears + diarrhoea + 
+                 religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
+                 border + lstmean +
+                 motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+exp(coefficients(adj2))
+
+# Adjusted model two (still need to do)
+adj3 <- filter(comp_data$surveyyear != "2000") %>%  svyglm(haz ~ ethnic + surveyyear + edhigh + gender + ageyears + diarrhoea + 
+                 religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
+                 border + lstmean +
+                 motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+exp(coefficients(adj3))
+
 
 
