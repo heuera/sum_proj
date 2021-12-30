@@ -78,7 +78,7 @@ DHSdesign <- comp_data %>%
                               weights = comp_data$hh_samp_weight, 
                               probs = NULL)
 
-# Descriptive analysis
+############################ Descriptive Analysis ##############################
 svy: tab haz eth, column ci 
 
 svyby(~ageyears, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
@@ -114,8 +114,96 @@ svyby(~precipitation_mean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 svymean(~comp_data$lstmean, DHSdesign, na.rm = TRUE) #good
 svyby(~lstmean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
 
+# Association with stunting
+svy: tab haz eth, count
+svy: tab haz eth, col
+svyglm(haz ~ ethnic + surveyyear, design = DHSdesign, family = "binomial") 
+
+svy: tab haz ageyears, count
+svy: tab haz ageyears, col
+svyglm(haz ~ ageyears + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz gender, count
+svy: tab haz gender, col
+svyglm(haz ~ gender + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz healthcard, count
+svy: tab haz healthcard, col
+svyglm(haz ~ healthcard + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz diarrhoea, count
+svy: tab haz diarrhoea, col
+svyglm(haz ~ diarrhoea + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz whz, count format(%5.2f)
+svy: tab haz whz, col
+svyglm(haz ~ whz + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz waz, count
+svy: tab haz waz, col
+svyglm(haz ~ waz + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz border_cat, count
+svy: tab haz border_cat, col
+svyglm(haz ~ border + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz religion_n, count
+svy: tab haz religion_n, col
+svyglm(haz ~ religion + surveyyear, design = DHSdesign, family = "binomial")
 
 
+svy: tab haz motherage_cat, count
+svy: tab haz motherage_cat, col
+svyglm(haz ~ motherage + surveyyear, design = DHSdesign, family = "binomial")
+
+
+svy: tab haz motherheightcm_cat, count
+svy: tab haz motherheightcm_cat, col
+svyglm(haz ~ motherheightcm + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz crowding, count
+svy: tab haz crowding, col
+svyglm(haz ~ crowding + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz swater, count
+svy: tab haz swater, col
+svyglm(haz ~ swater + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz housetype, count
+svy: tab haz housetype, col
+svyglm(haz ~ housetype + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz tfacility, count format(%5.2f)
+svy: tab haz tfacility, col
+svyglm(haz ~ tfacility + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz wealthq, count
+svy: tab haz wealthq, col
+svyglm(haz ~ wealthq + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz edhigh, count
+svy: tab haz edhigh, col
+svyglm(haz ~ edhigh + surveyyear, design = DHSdesign, family = "binomial")
+
+
+svy: tab haz urbanrural, count format(%5.2f)
+svy: tab haz urbanrural, col
+svyglm(haz ~ urbanrural + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz altitude_cat, count 
+svy: tab haz altitude_cat, col
+svyglm(haz ~ clusteraltitude + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz rain, count 
+svy: tab haz rain, col
+svyglm(haz ~ precipitation_mean + surveyyear, design = DHSdesign, family = "binomial")
+
+svy: tab haz temp, count 
+svy: tab haz temp, col
+svyglm(haz ~ lstmean + surveyyear, design = DHSdesign, family = "binomial")
+
+
+################################### Models #####################################
 # Crude model
 crude <- svyglm(haz ~ ethnic + surveyyear, design = DHSdesign, family = "binomial")
 exp(coefficients(crude))
