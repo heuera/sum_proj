@@ -75,159 +75,193 @@ comp_data <- comp_data %>% mutate(
 DHSdesign <- comp_data %>% 
                     svydesign(id = comp_data$unique_id, 
                               strata = comp_data$urbanrural, 
-                              weights = comp_data$hh_samp_weight, 
                               probs = NULL)
 
 ############################ Descriptive Analysis ##############################
-svy: tab haz eth, column ci 
-
-svyby(~ageyears, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-svymean(~comp_data$ageyears, DHSdesign, na.rm = TRUE) #good
-
-svy: tab gender eth, column ci 
-svy: tab healthcard eth, column ci 
-svy: tab whz eth, column ci // wasted
-svy: tab waz eth, column ci //underweight
-
-svymean(~comp_data$border, DHSdesign, na.rm = TRUE) #good
-svyby(~border, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-
-svy: tab religion_n eth, column ci 
-
-svymean(~comp_data$motherage, DHSdesign, na.rm = TRUE) #good
-svyby(~motherage, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-svymean(~comp_data$motherheightcm, DHSdesign, na.rm = TRUE) #good
-svyby(~motherheightcm, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-
-svy: tab crowding eth, column ci //not avail. for all years
-svy: tab swater eth, column ci 
-svy: tab housetype eth, column ci //not avail. for all years
-svy: tab tfacility eth, column ci 
-svy: tab wealthq eth, column ci //not avail. for all years
-svy: tab edhigh eth, column ci 
-svy: tab urbanrural eth, column ci 
-
-svymean(~comp_data$clusteraltitude, DHSdesign, na.rm = TRUE) #good
-svyby(~clusteraltitude, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-svymean(~comp_data$precipitation_mean, DHSdesign, na.rm = TRUE) #good
-svyby(~precipitation_mean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-svymean(~comp_data$lstmean, DHSdesign, na.rm = TRUE) #good
-svyby(~lstmean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) #good
-
+    # HAZ & ethnicity
+    svytable(~haz+ethnic, DHSdesign)
+    svychisq(~haz+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~haz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # child age in years & ethnicity
+    svyby(~ageyears, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    svymean(~comp_data$ageyears, DHSdesign, na.rm = TRUE) 
+    # gender & ethnicity
+    svytable(~gender+ethnic, DHSdesign)
+    svychisq(~gender+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~gender, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # has a health card & ethnicity
+    svytable(~healthcard+ethnic, DHSdesign)
+    svychisq(~healthcard+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~healthcard, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # WHZ & ethnicity
+    svytable(~whz+ethnic, DHSdesign)
+    svychisq(~whz+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~whz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # WAZ & ethnicity
+    svytable(~waz+ethnic, DHSdesign)
+    svychisq(~waz+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~waz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # borth order & ethnicity
+    svymean(~comp_data$border, DHSdesign, na.rm = TRUE)
+    svyby(~border, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    # religion & ethnicity
+    svytable(~religion+ethnic, DHSdesign)
+    svychisq(~religion+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~religion, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # mother's age & ethnicity
+    svymean(~comp_data$motherage, DHSdesign, na.rm = TRUE) 
+    svyby(~motherage, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    # mother's height & ethnicity
+    svymean(~comp_data$motherheightcm, DHSdesign, na.rm = TRUE) 
+    svyby(~motherheightcm, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    # house crowding & ethnicity
+    svytable(~crowding+ethnic, DHSdesign)
+    svychisq(~crowding+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~crowding, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # water source & ethnicity
+    svytable(~swater+ethnic, DHSdesign)
+    svychisq(~swater+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~swater, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # house type & ethnicity
+    svytable(~housetype+ethnic, DHSdesign)
+    svychisq(~housetype+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~housetype, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # toilet facility & ethnicity
+    svytable(~tfacility+ethnic, DHSdesign)
+    svychisq(~tfaciity+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~tfacility, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # wealth quintile & ethnicity
+    svytable(~wealthq+ethnic, DHSdesign)
+    svychisq(~wealthq+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~wealthq, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # household head highest education level & ethnicity
+    svytable(~edhigh+ethnic, DHSdesign)
+    svychisq(~edhigh+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~edhigh, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # urban or rural & ethnicity
+    svytable(~urbanrural+ethnic, DHSdesign)
+    svychisq(~urbanrural+ethnic, DHSdesign, statistic = "adjWald")
+    svyby(~urbanrural, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    # altitiude & ethnicity
+    svymean(~comp_data$clusteraltitude, DHSdesign, na.rm = TRUE) 
+    svyby(~clusteraltitude, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    # mean monthly precip & ethnicity
+    svymean(~comp_data$precipitation_mean, DHSdesign, na.rm = TRUE) 
+    svyby(~precipitation_mean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    # land surface temp mean & ethnicity
+    svymean(~comp_data$lstmean, DHSdesign, na.rm = TRUE) 
+    svyby(~lstmean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
+    
 # Association with stunting
-svy: tab haz eth, count
-svy: tab haz eth, col
-svyglm(haz ~ ethnic + surveyyear, design = DHSdesign, family = "binomial") 
-
-svy: tab haz ageyears, count
-svy: tab haz ageyears, col
-svyglm(haz ~ ageyears + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz gender, count
-svy: tab haz gender, col
-svyglm(haz ~ gender + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz healthcard, count
-svy: tab haz healthcard, col
-svyglm(haz ~ healthcard + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz diarrhoea, count
-svy: tab haz diarrhoea, col
-svyglm(haz ~ diarrhoea + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz whz, count format(%5.2f)
-svy: tab haz whz, col
-svyglm(haz ~ whz + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz waz, count
-svy: tab haz waz, col
-svyglm(haz ~ waz + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz border_cat, count
-svy: tab haz border_cat, col
-svyglm(haz ~ border + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz religion_n, count
-svy: tab haz religion_n, col
-svyglm(haz ~ religion + surveyyear, design = DHSdesign, family = "binomial")
-
-
-svy: tab haz motherage_cat, count
-svy: tab haz motherage_cat, col
-svyglm(haz ~ motherage + surveyyear, design = DHSdesign, family = "binomial")
-
-
-svy: tab haz motherheightcm_cat, count
-svy: tab haz motherheightcm_cat, col
-svyglm(haz ~ motherheightcm + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz crowding, count
-svy: tab haz crowding, col
-svyglm(haz ~ crowding + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz swater, count
-svy: tab haz swater, col
-svyglm(haz ~ swater + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz housetype, count
-svy: tab haz housetype, col
-svyglm(haz ~ housetype + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz tfacility, count format(%5.2f)
-svy: tab haz tfacility, col
-svyglm(haz ~ tfacility + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz wealthq, count
-svy: tab haz wealthq, col
-svyglm(haz ~ wealthq + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz edhigh, count
-svy: tab haz edhigh, col
-svyglm(haz ~ edhigh + surveyyear, design = DHSdesign, family = "binomial")
-
-
-svy: tab haz urbanrural, count format(%5.2f)
-svy: tab haz urbanrural, col
-svyglm(haz ~ urbanrural + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz altitude_cat, count 
-svy: tab haz altitude_cat, col
-svyglm(haz ~ clusteraltitude + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz rain, count 
-svy: tab haz rain, col
-svyglm(haz ~ precipitation_mean + surveyyear, design = DHSdesign, family = "binomial")
-
-svy: tab haz temp, count 
-svy: tab haz temp, col
-svyglm(haz ~ lstmean + surveyyear, design = DHSdesign, family = "binomial")
+    # HAZ & ethnicity
+    svytable(~haz+ethnic, DHSdesign)
+    svyby(~haz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(ethnic) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & child age in years
+    svytable(~haz+ageyears, DHSdesign)
+    svyby(~haz, comp_data$ageyears, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(ageyears) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & gender
+    svytable(~haz+gender, DHSdesign)
+    svyby(~haz, comp_data$gender, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(gender) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & has a health card
+    svytable(~haz+healthcard, DHSdesign)
+    svyby(~haz, comp_data$healthcard, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(healthcard) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & diarrhoea
+    svytable(~haz+diarrhoea, DHSdesign)
+    svyby(~haz, comp_data$diarrhoea, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(diarrhoea) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & WHZ
+    svytable(~haz+whz, DHSdesign)
+    svyby(~haz, comp_data$whz, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(whz) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & WAZ
+    svytable(~haz+waz, DHSdesign)
+    svyby(~haz, comp_data$waz, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(waz) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & birth order
+    svytable(~haz+border, DHSdesign)
+    svyby(~haz, comp_data$border, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(border) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & religion
+    svytable(~haz+religion, DHSdesign)
+    svyby(~haz, comp_data$religion, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(religion) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & mother's age
+    svytable(~haz+motherage, DHSdesign)
+    svyby(~haz, comp_data$motherage, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(motherage) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & mother's height
+    svytable(~haz+motherheightcm, DHSdesign)
+    svyby(~haz, comp_data$motherheightcm, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(motherheightcm) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & house crowding
+    svytable(~haz+crowding, DHSdesign)
+    svyby(~haz, comp_data$crowding, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(crowding) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & water source
+    svytable(~haz+swater, DHSdesign)
+    svyby(~haz, comp_data$swater, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(swater) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & house type
+    svytable(~haz+housetype, DHSdesign)
+    svyby(~haz, comp_data$housetype, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(housetype) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & toilet facility
+    svytable(~haz+tfacility, DHSdesign)
+    svyby(~haz, comp_data$tfacility, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(tfacility) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & family wealth quintile
+    svytable(~haz+wealthq, DHSdesign)
+    svyby(~haz, comp_data$wealthq, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(wealthq) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & household head highest education level
+    svytable(~haz+edhigh, DHSdesign)
+    svyby(~haz, comp_data$edhigh, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(edhigh) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & urban or rural
+    svytable(~haz+urbanrural, DHSdesign)
+    svyby(~haz, comp_data$urbanrural, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(urbanrural) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & altitude
+    svytable(~haz+clusteraltitude, DHSdesign)
+    svyby(~haz, comp_data$clusteraltitude, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(clusteraltitude) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & mean monthly precip
+    svytable(~haz+precipitation_mean, DHSdesign)
+    svyby(~haz, comp_data$precipitation_mean, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(precipitation_mean) + factor(surveyyear), design = DHSdesign, family = "binomial"))
+    # HAZ & land surface temperature mean
+    svytable(~haz+lstmean, DHSdesign)
+    svyby(~haz, comp_data$lstmean, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+    summary(svyglm(haz ~ factor(lstmean) + factor(surveyyear), design = DHSdesign, family = "binomial"))
 
 
 ################################### Models #####################################
-# Crude model
-crude <- svyglm(haz ~ ethnic + surveyyear, design = DHSdesign, family = "binomial")
-exp(coefficients(crude))
-
-# Adjusted model one
-adj1 <- svyglm(haz ~ ethnic + surveyyear + wealthq + edhigh + gender + ageyears + diarrhoea + 
-                  religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
-                  crowding + housetype + border + clusteraltitude + lstmean +
-                    motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
-exp(coefficients(adj1))
-
-# Adjusted model two
-adj2 <- svyglm(haz ~ ethnic + surveyyear + edhigh + gender + ageyears + diarrhoea + 
-                 religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
-                 border + lstmean +
-                 motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
-exp(coefficients(adj2))
-
-# Adjusted model two (still need to do)
-adj3 <- filter(comp_data$surveyyear != "2000") %>%  svyglm(haz ~ ethnic + surveyyear + edhigh + gender + ageyears + diarrhoea + 
-                 religion + waz + whz + urbanrural + tfacility + swater + healthcard + 
-                 border + lstmean +
-                 motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
-exp(coefficients(adj3))
+    # Crude model
+    crude <- svyglm(haz ~ factor(ethnic) + factor(surveyyear), design = DHSdesign, family = "binomial")
+    exp(coefficients(crude))
+    
+    # Adjusted model one
+    adj1 <- svyglm(haz ~ factor(ethnic) + factor(surveyyear) + factor(wealthq) + factor(edhigh) + factor(gender) + factor(ageyears) + factor(diarrhoea) + 
+                        factor(religion) + factor(waz) + factor(whz) + factor(urbanrural) + factor(tfacility) + factor(swater) + factor(healthcard) + 
+                        factor(crowding) + factor(housetype) + factor(border) + clusteraltitude + lstmean +
+                        motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+    exp(coefficients(adj1))
+    
+    # Adjusted model two
+    adj2 <- svyglm(haz ~ factor(ethnic) + factor(surveyyear) + factor(edhigh) + factor(gender) + factor(ageyears) + factor(diarrhoea) + 
+                         factor(religion) + factor(waz) + factor(whz) + factor(urbanrural) + factor(tfacility) + factor(swater) + factor(healthcard) + 
+                         factor(border) + lstmean + motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+    exp(coefficients(adj2))
+    
+    # Adjusted model two (still need to do)
+    comp_data %>% filter(surveyyear == "2000") %>% svyglm(haz ~ factor(ethnic) + factor(surveyyear) + factor(edhigh) + factor(gender) + factor(ageyears) + factor(diarrhoea) + 
+             factor(religion) + factor(waz) + factor(whz) + factor(urbanrural) + factor(tfacility) + factor(swater) + factor(healthcard) + 
+             factor(border) + lstmean + motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
+    exp(coefficients(adj3))
 
 
 
