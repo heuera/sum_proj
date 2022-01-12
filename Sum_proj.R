@@ -1,4 +1,4 @@
-# Austin's MSc Summer Project in R
+# Austin's MSc Summer Project in R----------------------------------------------
 
 ################################################################################
 ################################### Setup ######################################
@@ -6,18 +6,25 @@
 library(pacman)
 p_load(tidyverse, dplyr, forcats, ggplot2, lubridate, purrr, haven, survey, modelr)
 
-# Read in datasets
+# Read in datasets--------------------------------------------------------------
 child <- read_dta("/Users/austinheuer/Desktop/LSHTM/Summer Project/00_Ethiopia Data/Data_for_Austin_child1.dta")
 house <- read_dta("/Users/austinheuer/Desktop/LSHTM/Summer Project/00_Ethiopia Data/Data_for_Austin_household.dta")
 
-# Join data sets
+# Join data sets----------------------------------------------------------------
 comp_data <- left_join(child, house) 
 comp_data <- as_tibble(comp_data)
 
-# Filter out children older than five
+# Filter out children older than five-------------------------------------------
 comp_data <- comp_data %>% filter(ageyears < 5)
 
-# Organize variables 
+# Remove unneeded columns-------------------------------------------------------
+comp_data <- subset(comp_data, select = c(eth, surveyyear, wealthq, edhigh, gender, ageyears, diarrhoea, 
+                                            religion, haz, waz, whz, urbanrural, tfacility, swater, healthcard, 
+                                            crowding, housetype, border, clusteraltitude, lstmean,
+                                            motherheightcm, motherage, precipitation_mean, hhweight, surveyid, 
+                                            clusterid))
+
+# Organize variables------------------------------------------------------------
 comp_data <- comp_data %>% mutate(haz = as.factor(haz))
 levels(comp_data$haz) <- c("Not stunted", "Stunted")
 
@@ -27,16 +34,6 @@ comp_data$surveyyear <- cut(comp_data$surveyyear,
 
 comp_data <- comp_data %>% mutate(ethnic = as.factor(eth))
 levels(comp_data$ethnic) <- c("Oromo", "Amhara", "Tigrie", "Other")
-
-cols <- c('electricity', 'radio', 'tv', 'fridge', 'bicycle', 'scooter', 'car') 
-comp_data[cols] <- lapply(comp_data[cols], factor)
-levels(comp_data$electricity) <- c("No", "Yes")
-levels(comp_data$radio) <- c("No", "Yes")
-levels(comp_data$tv) <- c("No", "Yes")
-levels(comp_data$fridge) <- c("No", "Yes")
-levels(comp_data$bicycle) <- c("No", "Yes")
-levels(comp_data$scooter) <- c("No", "Yes")
-levels(comp_data$car) <- c("No", "Yes")
 
 comp_data$border <- cut(comp_data$border, 
                       breaks = c(-Inf, 1, 2, 3, 4, 5, 6, 20), 
@@ -67,7 +64,6 @@ comp_data$motherheightcm <- cut(comp_data$motherheightcm,
 comp_data$clusteraltitude <- cut(comp_data$clusteraltitude,
                         breaks = c(-Inf, 0, 1400, 1999, 4000),
                         labels = c("Missing", "<1400", "1401-1999", ">2000"))
-
 comp_data$clusteraltitude <- na_if(comp_data$clusteraltitude, "Missing")
 
 comp_data$precipitation_mean <- cut(comp_data$precipitation_mean,
@@ -78,7 +74,9 @@ comp_data$lstmean <- cut(comp_data$lstmean,
                          breaks = c(-Inf, 30, 33.999, 50),
                          labels = c("<30", "30-34", ">34"))
 
-# Account for DHS survey design
+################################################################################
+############################## DHS Design ######################################
+################################################################################
 comp_data <- comp_data %>% mutate(
             hh_samp_weight = as.numeric(hhweight/1000000),
             unique_id = as.numeric(paste0(surveyid, clusterid,"")))
@@ -90,96 +88,97 @@ DHSdesign <- comp_data %>%
 ################################################################################
 ############################ Descriptive Analysis ##############################
 ################################################################################
-# HAZ & ethnicity
+
+# HAZ & ethnicity---------------------------------------------------------------
 svytable(~haz+ethnic, DHSdesign)
 svychisq(~haz+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~haz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# child age in years & ethnicity
+# child age in years & ethnicity------------------------------------------------
 svyby(~ageyears, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 svymean(~comp_data$ageyears, DHSdesign, na.rm = TRUE) 
 
-# gender & ethnicity
+# gender & ethnicity------------------------------------------------------------
 svytable(~gender+ethnic, DHSdesign)
 svychisq(~gender+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~gender, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# has a health card & ethnicity
+# has a health card & ethnicity-------------------------------------------------
 svytable(~healthcard+ethnic, DHSdesign)
 svychisq(~healthcard+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~healthcard, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# WHZ & ethnicity
+# WHZ & ethnicity---------------------------------------------------------------
 svytable(~whz+ethnic, DHSdesign)
 svychisq(~whz+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~whz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# WAZ & ethnicity
+# WAZ & ethnicity---------------------------------------------------------------
 svytable(~waz+ethnic, DHSdesign)
 svychisq(~waz+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~waz, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# birth order & ethnicity
+# birth order & ethnicity-------------------------------------------------------
 svymean(~comp_data$border, DHSdesign, na.rm = TRUE)
 svyby(~border, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
-# religion & ethnicity
+# religion & ethnicity----------------------------------------------------------
 svytable(~religion+ethnic, DHSdesign)
 svychisq(~religion+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~religion, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# mother's age & ethnicity
+# mother's age & ethnicity------------------------------------------------------
 svymean(~comp_data$motherage, DHSdesign, na.rm = TRUE) 
 svyby(~motherage, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
-# mother's height & ethnicity
+# mother's height & ethnicity---------------------------------------------------
 svymean(~comp_data$motherheightcm, DHSdesign, na.rm = TRUE) 
 svyby(~motherheightcm, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
-# house crowding & ethnicity
+# house crowding & ethnicity----------------------------------------------------
 svytable(~crowding+ethnic, DHSdesign)
 svychisq(~crowding+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~crowding, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# water source & ethnicity
+# water source & ethnicity------------------------------------------------------
 svytable(~swater+ethnic, DHSdesign)
 svychisq(~swater+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~swater, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# house type & ethnicity
+# house type & ethnicity--------------------------------------------------------
 svytable(~housetype+ethnic, DHSdesign)
 svychisq(~housetype+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~housetype, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# toilet facility & ethnicity
+# toilet facility & ethnicity---------------------------------------------------
 svytable(~tfacility+ethnic, DHSdesign)
 svychisq(~tfaciity+ethnic, DHSdesign, statistic = "adjWald")
-svyby(~tfacility, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
+svyby(~tfacility, ~ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# wealth quintile & ethnicity
+# wealth quint. & ethnicity-----------------------------------------------------
 svytable(~wealthq+ethnic, DHSdesign)
 svychisq(~wealthq+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~wealthq, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# household head highest education level & ethnicity
+# household head highest education level & ethnicity----------------------------
 svytable(~edhigh+ethnic, DHSdesign)
 svychisq(~edhigh+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~edhigh, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# urban or rural & ethnicity
+# urban or rural & ethnicity----------------------------------------------------
 svytable(~urbanrural+ethnic, DHSdesign)
 svychisq(~urbanrural+ethnic, DHSdesign, statistic = "adjWald")
 svyby(~urbanrural, comp_data$ethnic, DHSdesign, svyciprop, vartype = "ci", na.rm = TRUE, level = 0.95)
 
-# altitude & ethnicity
+# altitude & ethnicity----------------------------------------------------------
 svymean(~comp_data$clusteraltitude, DHSdesign, na.rm = TRUE) 
 svyby(~clusteraltitude, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
-# mean monthly precip & ethnicity
+# mean monthly precip & ethnicity-----------------------------------------------
 svymean(~comp_data$precipitation_mean, DHSdesign, na.rm = TRUE) 
 svyby(~precipitation_mean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
-# land surface temp mean & ethnicity
+# land surface temp mean & ethnicity--------------------------------------------
 svymean(~comp_data$lstmean, DHSdesign, na.rm = TRUE) 
 svyby(~lstmean, ~comp_data$ethnic, DHSdesign, svymean, na.rm = TRUE) 
 
@@ -292,13 +291,14 @@ summary(svyglm(haz ~ factor(lstmean) + factor(surveyyear), design = DHSdesign, f
 ################################################################################
 ################################### Models #####################################
 ################################################################################
-# Crude model
+
+# Crude model-------------------------------------------------------------------
 crude <- svyglm(haz ~ factor(ethnic) + factor(surveyyear), design = DHSdesign, family = "binomial")
 summary(crude)
 exp(coefficients(crude))
 regTermTest(crude,"factor(ethnic)")
   
-# Adjusted model 1
+# Adjusted model 1--------------------------------------------------------------
 adj1 <- svyglm(haz ~ factor(ethnic) + factor(surveyyear) + factor(wealthq) + factor(edhigh) + factor(gender) + factor(ageyears) + factor(diarrhoea) + 
                     factor(religion) + factor(waz) + factor(whz) + factor(urbanrural) + factor(tfacility) + factor(swater) + factor(healthcard) + 
                     factor(crowding) + factor(housetype) + factor(border) + clusteraltitude + lstmean +
@@ -307,14 +307,15 @@ summary(adj1)
 exp(coefficients(adj1))
 regTermTest(adj1,"factor(ethnic)")
   
-# Adjusted model 2
+# Adjusted model 2--------------------------------------------------------------
 adj2 <- svyglm(haz ~ factor(ethnic) + factor(surveyyear) + factor(edhigh) + factor(gender) + factor(ageyears) + factor(diarrhoea) + 
                      factor(religion) + factor(waz) + factor(whz) + factor(urbanrural) + factor(tfacility) + factor(swater) + factor(healthcard) + 
                      factor(border) + lstmean + motherheightcm + motherage + precipitation_mean, design = DHSdesign, family = "binomial")
 summary(adj2)
 exp(coefficients(adj2))
 regTermTest(adj2,"factor(ethnic)")
-  
+
+# Adjusted Model 3--------------------------------------------------------------
 # Adjusted model 3a (2000 survey year only)
 comp_data2000 <- comp_data %>% filter(surveyyear == "2000")
 DHSdesign2000 <- comp_data2000 %>% 
